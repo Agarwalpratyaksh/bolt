@@ -14,5 +14,6 @@ type MessagesStore = {
 export const useMessagesStore = create<MessagesStore>((set) => ({
   messages: [],
   addMessage: (message) => set((state) => ({ messages: [...state.messages, message] })),
+  // addMessage: (message) => set(() => ({ messages: [ message] })),
   clearMessages: () => set({ messages: [] }),
 }));
