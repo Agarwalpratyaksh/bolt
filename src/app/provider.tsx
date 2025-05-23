@@ -3,35 +3,61 @@
 import * as React from "react";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import Header from "@/components/custom/Header";
-import { MessageContext, MessageContextType } from "@/context/MessageContext";
-import { UserDetailContext, UserDetailContextType } from "@/context/UserDetailsContext";
-import { GoogleOAuthProvider } from '@react-oauth/google';
+import { GoogleOAuthProvider } from "@react-oauth/google";
+import { useConvex } from "convex/react";
+import { api } from "../../convex/_generated/api";
+import { useUserDetailStore } from "@/store/userDetailsStore";
 
 export default function Provider({
   children,
 }: React.ComponentProps<typeof NextThemesProvider>) {
-  const [message, setMessage] = React.useState<MessageContextType[]>();
-  const [userInfo, setUserInfo] = React.useState<UserDetailContextType>();
+  const convex = useConvex();
+
+  //zustand libs
+  const { setUserInfo } = useUserDetailStore();
+
+  const isAuthenticated = async () => {
+    if (typeof window !== "undefined") {
+      const user = JSON.parse(localStorage.getItem("user") as string);
+      if (user && user.email) {
+        const email = user.email;
+
+        // Check if convex is available
+        if (convex) {
+          try {
+            const data = await convex.query(api.users.getUser, { email });
+            console.log(data);
+            setUserInfo(data);
+          } catch (error) {
+            console.error("Error fetching user data:", error);
+          }
+        } else {
+          console.error("Convex client is not initialized");
+        }
+      }
+    }
+  };
+
+  React.useEffect(() => {
+    isAuthenticated();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
-    
-      <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID as string}>
-<UserDetailContext.Provider value={{userInfo,setUserInfo}}>
-      <MessageContext.Provider value={{ message, setMessage }}>
-        <NextThemesProvider
-          attribute="class"
-          defaultTheme="system"
-          forcedTheme="dark"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <Header />
+    <GoogleOAuthProvider
+      clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID as string}
+    >
+      <NextThemesProvider
+        attribute="class"
+        defaultTheme="system"
+        forcedTheme="dark"
+        enableSystem
+        disableTransitionOnChange
+      >
+        <Header />
 
-          {children}
-        </NextThemesProvider>
-      </MessageContext.Provider>
-      </UserDetailContext.Provider>
-      </GoogleOAuthProvider>
-    
+        {children}
+      </NextThemesProvider>
+    </GoogleOAuthProvider>
   );
 }

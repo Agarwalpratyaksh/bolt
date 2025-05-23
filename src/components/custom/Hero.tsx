@@ -1,35 +1,34 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 "use client"
 import { Link } from 'lucide-react'
-import React, { useContext, useState } from 'react'
+import React, {  useState } from 'react'
 import { Button } from '../ui/button'
-import { MessageContext } from '@/context/MessageContext'
-import { UserDetailContext } from '@/context/UserDetailsContext'
+// import { UserDetailContext } from '@/context/UserDetailsContext'
 import SignInDialogue from './SignInDialogue'
 import { useMessagesStore } from '@/store/messageStore'
+import { useUserDetailStore } from '@/store/userDetailsStore'
 
 function Hero() {
   const [userInput,setUserInput] = useState<string>()
   const [openDialogue, setOpenDialogue] = useState<boolean>(false)
 
 
+   //using zustand in place of context
+   const { messages, addMessage } = useMessagesStore();
+   const { userInfo, setUserInfo } = useUserDetailStore();
+ 
+ 
 
-  const userInfoContext = useContext(UserDetailContext)
-  if(!userInfoContext){return null}
-  const {userInfo,setUserInfo} = userInfoContext
-
-  
-
+  // const userInfoContext = useContext(UserDetailContext)
+  // if(!userInfoContext){return null}
+  // const {userInfo,setUserInfo} = userInfoContext
   // const messageContext = useContext(MessageContext)
   // if(!messageContext){
   //   return null;
   // }
   // const {message,setMessage} = messageContext
 
-  //using zustand in place of context
-
-  const { messages, addMessage } = useMessagesStore();
-
+ 
 
   const onGenerate = (input:string)=>{
     if(input == undefined ||!input.trim() ){
@@ -38,7 +37,7 @@ function Hero() {
 
 
     //check for username authentication
-    if(!userInfo?.username){
+    if(!userInfo?.email){
       setOpenDialogue(true)
     }
 

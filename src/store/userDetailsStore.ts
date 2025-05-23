@@ -1,11 +1,12 @@
 // store/userDetailStore.ts
-import {create} from "zustand";
+import { create } from "zustand";
 
 // Define the type for the User Details
 export type UserDetailContextType = {
-    name: string;
+  name: string;
   email: string;
-  picture:string
+  picture: string;
+  uid:string
 };
 
 type UserDetailStore = {

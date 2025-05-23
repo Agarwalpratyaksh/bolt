@@ -10,6 +10,16 @@ import { Button } from "../ui/button";
 import axios from "axios";
 import { useUserDetailStore } from "@/store/userDetailsStore";
 import { useEffect } from "react";
+import { useMutation } from "convex/react";
+import { api } from "../../../convex/_generated/api";
+import { v4 as uuidv4 } from 'uuid';
+
+export type GoogleUser = {
+  email: string;
+  name: string;
+  picture: string;
+  sub: string;
+};
 
 function SignInDialogue({
   isOpen,
@@ -18,6 +28,7 @@ function SignInDialogue({
   isOpen: boolean;
   changeOpen: (e: boolean) => void;
 }) {
+  const createUser = useMutation(api.users.createUser);
   const { userInfo, setUserInfo } = useUserDetailStore();
 
   const googleLogin = useGoogleLogin({
@@ -32,6 +43,19 @@ function SignInDialogue({
       changeOpen(false);
 
       setUserInfo(userInfo.data);
+
+      //saving our data to databse
+      const user:GoogleUser = userInfo.data;
+     const dbresult = await createUser({
+        email: user.email,
+        name: user.name,
+        picture: user.picture,
+        uid:uuidv4()
+       });
+
+       console.log(dbresult)
+       //saving user to localstorage
+       localStorage.setItem("user",JSON.stringify(user))
     },
     onError: (errorResponse) => console.log(errorResponse),
   });
