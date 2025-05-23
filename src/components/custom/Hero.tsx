@@ -5,8 +5,12 @@ import React, {  useState } from 'react'
 import { Button } from '../ui/button'
 // import { UserDetailContext } from '@/context/UserDetailsContext'
 import SignInDialogue from './SignInDialogue'
-import { useMessagesStore } from '@/store/messageStore'
+import { MessageContextType, useMessagesStore } from '@/store/messageStore'
 import { useUserDetailStore } from '@/store/userDetailsStore'
+import { useMutation } from 'convex/react'
+import { api } from '../../../convex/_generated/api'
+import { Id } from '../../../convex/_generated/dataModel'
+import { useRouter } from 'next/navigation'
 
 function Hero() {
   const [userInput,setUserInput] = useState<string>()
@@ -16,21 +20,15 @@ function Hero() {
    //using zustand in place of context
    const { messages, addMessage } = useMessagesStore();
    const { userInfo, setUserInfo } = useUserDetailStore();
- 
- 
 
-  // const userInfoContext = useContext(UserDetailContext)
-  // if(!userInfoContext){return null}
-  // const {userInfo,setUserInfo} = userInfoContext
-  // const messageContext = useContext(MessageContext)
-  // if(!messageContext){
-  //   return null;
-  // }
-  // const {message,setMessage} = messageContext
+
+   const createWorkspace = useMutation(api.workspace.createWorkspace)
+
+   const router = useRouter()
 
  
 
-  const onGenerate = (input:string)=>{
+  const onGenerate = async (input:string)=>{
     if(input == undefined ||!input.trim() ){
       return alert("Enter the Prompt")
     }
@@ -41,17 +39,20 @@ function Hero() {
       setOpenDialogue(true)
     }
 
-   
-    // setMessage([{
-    //   role:'User',
-    //   content: input
-    // }])
-    // console.log(message)
-    addMessage({
-      role:"User",
-      content: input
-    })
+   const msg: MessageContextType = {
+    role:"User",
+    content: input
+  }
+    addMessage(msg)
     console.log(messages)
+
+    const workspaceId = await createWorkspace({
+      message:[msg],
+      users: userInfo?._id as Id<"users">
+    })
+
+    console.log(workspaceId)
+    router.push('/workspace/'+workspaceId)
 
 
   }

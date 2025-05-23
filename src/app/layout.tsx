@@ -15,16 +15,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body
-     
-      >
-
-<ConvexClientProvider>
-    <Provider>
-
-        {children}
-    </Provider>
-    </ConvexClientProvider>
+      <body>
+        <ConvexClientProvider>
+          <Provider>{children}</Provider>
+        </ConvexClientProvider>
       </body>
     </html>
   );

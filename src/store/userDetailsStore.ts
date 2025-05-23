@@ -6,7 +6,8 @@ export type UserDetailContextType = {
   name: string;
   email: string;
   picture: string;
-  uid:string
+  uid:string,
+  _id: string,
 };
 
 type UserDetailStore = {
