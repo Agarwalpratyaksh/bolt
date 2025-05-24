@@ -3,6 +3,7 @@
 
 export default {
     DEFAULT_FILE: {
+      
         '/public/index.html': {
           code: `<!DOCTYPE html>
     <html lang="en">
