@@ -8,6 +8,7 @@ import {
   SandpackPreview,
   SandpackLayout,
   SandpackFileExplorer,
+  useSandpackNavigation,
 } from "@codesandbox/sandpack-react";
 
 import defaultFiles from "@/data/files";
@@ -20,45 +21,61 @@ import axios from "axios";
 import { Loader2Icon } from "lucide-react";
 
 
+const PreviewTab = ({tab,currTab}) => {
+  const { refresh } = useSandpackNavigation();
 
+  return (
+    <h2
+      onClick={() => {
+        currTab("Preview")
+        refresh();
+      }}
+      className={`text-sm cursor-pointer ${
+        tab== "Preview" && " bg-blue-500 bg-opacity-25 p-1 px-3  rounded-full"
+      } `}
+    >
+      Preview
+    </h2>
+  );
+};
 
 function CodeView() {
-  const {id} =  useParams()
+  const { id } = useParams();
   const [activeTab, setActiveTab] = useState("code");
 
-  const defFiles = defaultFiles.DEFAULT_FILE
-  const [files,setFiles] = useState(defFiles)
+  const defFiles = defaultFiles.DEFAULT_FILE;
+  const [files, setFiles] = useState(defFiles);
 
-  const [loading,setLoading] = useState(false)
-  const {messages} = useMessagesStore()
+  const [loading, setLoading] = useState(false);
+  const { messages } = useMessagesStore();
 
-  const convex = useConvex()
+  const convex = useConvex();
 
-  const workspaceId = id as Id<"workspace">
+  const workspaceId = id as Id<"workspace">;
 
-  const updateFiles = useMutation(api.workspace.updateFile)
-
-  console.log(messages)
+  const updateFiles = useMutation(api.workspace.updateFile);
 
 
-  useEffect(()=>{
-    id && getFiles()
-  },[id])
+  // const { refresh } = useSandpackNavigation();
 
-  const getFiles = async()=>{
-    setLoading(true)
-    const result =await  convex.query(api.workspace.getWorkspace,{
-      workspaceId
-    })
 
-    
+  console.log(messages);
 
-    const mergedFiles = {...defFiles,...result?.fileDate}
-    console.log(mergedFiles)
-    setFiles(mergedFiles)
-    setLoading(false)
-  }
+  useEffect(() => {
+    id && getFiles();
+  }, [id]);
 
+  const getFiles = async () => {
+    setLoading(true);
+    const result = await convex.query(api.workspace.getWorkspace, {
+      workspaceId,
+    });
+
+    const mergedFiles = { ...defFiles, ...result?.fileDate };
+    console.log(mergedFiles);
+    setFiles(mergedFiles);
+    setLoading(false);
+  };
 
   useEffect(() => {
     if (messages.length > 0) {
@@ -68,53 +85,31 @@ function CodeView() {
       }
     }
   }, [messages]);
-  const generateAiCode = async ()=>{
-    setLoading(true)
+  const generateAiCode = async () => {
+    setLoading(true);
 
-    const prompt = JSON.stringify(messages)
+    const prompt = JSON.stringify(messages);
 
-    const response = await axios.post('/api/ai-codegen',{
-      prompt
-    })
+    const response = await axios.post("/api/ai-codegen", {
+      prompt,
+    });
 
-    console.log(response.data)
-    const aiResponse = response.data
+    console.log(response.data);
+    const aiResponse = response.data;
 
-    const mergedFiles = {...defFiles,...aiResponse?.files}
-    setFiles(mergedFiles)
+    const mergedFiles = { ...defFiles, ...aiResponse?.files };
+    setFiles(mergedFiles);
 
     await updateFiles({
       workspaceId,
-      files:aiResponse.files
-    })
+      files: aiResponse.files,
+    });
 
-    setLoading(false)
-
-
-  }
+    setLoading(false);
+  };
 
   return (
-   
-      <div className="relative">
-
-     
-      <div className="bg-[#181818] w-full p-2 border">
-        <div className="flex items-center flex-wrap shrink-0 bg-black p-1 w-[140px] gap-3 justify-center rounded-full">
-          <h2
-            onClick={() => setActiveTab("code")}
-            className={`text-sm cursor-pointer ${activeTab == "code" && " bg-blue-500 bg-opacity-25 p-1 px-3  rounded-full"} `}
-          >
-            Code
-          </h2>
-          <h2
-            onClick={() => setActiveTab("preview")}
-            className={`text-sm cursor-pointer ${activeTab == "preview" && " bg-blue-500 bg-opacity-25 p-1 px-3  rounded-full"} `}
-          >
-            Preview
-          </h2>
-        </div>
-      </div>
-     
+    <div className="relative">
       <SandpackProvider
         template="react"
         files={files}
@@ -123,15 +118,35 @@ function CodeView() {
           dependencies: defaultFiles.DEPENDANCY,
         }}
         options={{
-          externalResources: ["https://cdn.tailwindcss.com"]
+          externalResources: ["https://cdn.tailwindcss.com"],
         }}
       >
+        <div className="bg-[#181818] w-full p-2 border">
+          <div className="flex items-center flex-wrap shrink-0 bg-black p-1 w-[140px] gap-3 justify-center rounded-full">
+            <h2
+              onClick={() => setActiveTab("code")}
+              className={`text-sm cursor-pointer ${activeTab == "code" && " bg-blue-500 bg-opacity-25 p-1 px-3  rounded-full"} `}
+            >
+              Code
+            </h2>
+            {/* <h2
+              onClick={() => {
+                setActiveTab("preview");
+                refresh;
+              }}
+              className={`text-sm cursor-pointer ${activeTab == "preview" && " bg-blue-500 bg-opacity-25 p-1 px-3  rounded-full"} `}
+            >
+                Preview
+            </h2> */}
+            <PreviewTab currTab={setActiveTab} tab={activeTab}/>
+          </div>
+        </div>
+
         <SandpackLayout>
           {activeTab == "code" ? (
             <>
               <SandpackFileExplorer style={{ height: "80vh" }} />
               <SandpackCodeEditor style={{ height: "80vh" }} showTabs={false} />
-
             </>
           ) : (
             <>
@@ -149,5 +164,7 @@ function CodeView() {
     </div>
   );
 }
+
+
 
 export default CodeView;

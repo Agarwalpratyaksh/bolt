@@ -7,6 +7,7 @@ import { GoogleOAuthProvider } from "@react-oauth/google";
 import { useConvex } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { useUserDetailStore } from "@/store/userDetailsStore";
+import { useRouter } from "next/navigation";
 
 export default function Provider({
   children,
@@ -15,10 +16,18 @@ export default function Provider({
 
   //zustand libs
   const { setUserInfo } = useUserDetailStore();
+  const router = useRouter();
 
   const isAuthenticated = async () => {
     if (typeof window !== "undefined") {
       const user = JSON.parse(localStorage.getItem("user") as string);
+
+      if (!user) {
+        router.push("/");
+
+        return;
+      }
+
       if (user && user.email) {
         const email = user.email;
 
@@ -49,14 +58,17 @@ export default function Provider({
     >
       <NextThemesProvider
         attribute="class"
-        defaultTheme="system"
+        defaultTheme="dark"
         forcedTheme="dark"
         enableSystem
         disableTransitionOnChange
       >
         <Header />
 
+        {/* <SidebarTrigger /> */}
         {children}
+
+        {/* </SidebarProvider> */}
       </NextThemesProvider>
     </GoogleOAuthProvider>
   );

@@ -4,7 +4,7 @@ import React from "react";
 
 function Workspace() {
   return (
-    <div className="p-8 ">
+    <div className="p-8 pt-4 no-scrollbar">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
         <ChatView />
 
