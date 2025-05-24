@@ -20,8 +20,12 @@ import { Id } from "../../../convex/_generated/dataModel";
 import axios from "axios";
 import { Loader2Icon } from "lucide-react";
 
+interface PreviewTabProps {
+  tab: string;
+  currTab: (tabName: string) => void;
+}
 
-const PreviewTab = ({tab,currTab}) => {
+const PreviewTab: React.FC<PreviewTabProps> = ({ tab, currTab }) => {
   const { refresh } = useSandpackNavigation();
 
   return (

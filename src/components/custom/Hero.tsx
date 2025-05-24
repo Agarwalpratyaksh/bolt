@@ -1,9 +1,7 @@
-/* eslint-disable react-hooks/rules-of-hooks */
+
 "use client";
-import { ArrowRight, Link } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import React, { useState } from "react";
-import { Button } from "../ui/button";
-// import { UserDetailContext } from '@/context/UserDetailsContext'
 import SignInDialogue from "./SignInDialogue";
 import { MessageContextType, useMessagesStore } from "@/store/messageStore";
 import { useUserDetailStore } from "@/store/userDetailsStore";
