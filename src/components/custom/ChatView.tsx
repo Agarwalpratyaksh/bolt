@@ -1,9 +1,9 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 "use client";
-import { useMessagesStore } from "@/store/messageStore";
+import { MessageContextType, useMessagesStore } from "@/store/messageStore";
 import { useUserDetailStore } from "@/store/userDetailsStore";
-import { useConvex } from "convex/react";
+import { useConvex, useMutation } from "convex/react";
 import { ArrowRight } from "lucide-react";
 import Image from "next/image";
 import { useParams } from "next/navigation";
@@ -14,8 +14,9 @@ import { Id } from "../../../convex/_generated/dataModel";
 function ChatView() {
   const { id } = useParams();
   const convex = useConvex();
-  const { messages, addMessage } = useMessagesStore();
-  const { userInfo, setUserInfo } = useUserDetailStore();
+  const { messages, addMessage ,setMessages} = useMessagesStore();
+  const { userInfo } = useUserDetailStore();
+  const updateMessages = useMutation(api.workspace.updateWorkspace);
 
   const [userInput, setUserInput] = useState("");
   const [currentStream, setCurrentStream] = useState("");
@@ -25,6 +26,7 @@ function ChatView() {
 
   useEffect(() => {
     id && getWorkspaceData();
+    console.log("Use Effect function called")
   }, [id]);
 
   const getWorkspaceData = async () => {
@@ -32,8 +34,12 @@ function ChatView() {
       workspaceId,
     });
 
-    const [destructuredMessage] = result?.message;
-    addMessage(destructuredMessage);
+    // const [destructuredMessage] = result?.message;
+    // addMessage(destructuredMessage);
+    setMessages(result?.message || []);
+
+
+    console.log(messages)
   };
 
   useEffect(() => {
@@ -73,18 +79,22 @@ function ChatView() {
         setCurrentStream(fullMessage); // Update live view
       }
 
+      const msg: MessageContextType = { role: "Ai", content: fullMessage };
       // Save the final message in the messages array
-      addMessage({ role: "Ai", content: fullMessage });
+      addMessage(msg);
+
+      //saving message to db
+      await updateMessages({ message: [...messages,msg], workspaceId });
     }
 
     setLoading(false);
     setUserInput("");
   };
 
-  const onGenerate = async (userInput: string) =>{
-    addMessage({role:"User",content:userInput})
-    setUserInput("")
-  }
+  const onGenerate = async (userInput: string) => {
+    addMessage({ role: "User", content: userInput });
+    setUserInput("");
+  };
 
   return (
     <div className=" relative h-[85vh] flex flex-col">
@@ -132,7 +142,7 @@ function ChatView() {
       <div className="p-5 border rounded-xl max-w-2xl w-full mt-3 bg-zinc-900">
         <div className="flex gap-2">
           <textarea
-          value={userInput}
+            value={userInput}
             placeholder="What you want to add?"
             className="outline-none bg-transparent w-full h-28 resize-none no-scrollbar"
             onChange={(event) => setUserInput(event.target.value)}

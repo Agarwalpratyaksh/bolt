@@ -19,7 +19,7 @@ function Hero() {
 
    //using zustand in place of context
    const { messages, addMessage } = useMessagesStore();
-   const { userInfo, setUserInfo } = useUserDetailStore();
+   const { userInfo } = useUserDetailStore();
 
 
    const createWorkspace = useMutation(api.workspace.createWorkspace)
@@ -43,7 +43,7 @@ function Hero() {
     role:"User",
     content: input
   }
-    addMessage(msg)
+    // addMessage(msg)
     console.log(messages)
 
     const workspaceId = await createWorkspace({
